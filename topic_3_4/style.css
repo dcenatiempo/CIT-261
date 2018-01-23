@@ -1,0 +1,89 @@
+* {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .center-flex {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+  }
+  
+  .flex-left-column {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+  }
+  
+  .row-flex {
+    display: flex;
+    flex-flow: row wrap;
+  }
+  
+  .padding {
+    padding: 10px;
+  }
+  
+  .button {
+    background-color: #f2f2f2;
+    border-radius: 4px;
+    border-width: 2px 2px 6px 6px;
+    border-style: outset;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 10px 10px 0px 30px;
+    color: #404040;
+    margin: 30px 10px 30px 0;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    -ms-box-sizing: content-box;
+    box-sizing: content-box;
+  }
+  .button:active {
+    border-width: 2px;
+    margin-right: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .dos-prompt-screen {
+    background-color: blue;
+    color: white;
+    font-size: 14px;
+    font-family: 'Press Start 2P', monospace;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .dos-prompt-text {
+    color: white;
+    font-size: 14px;
+    font-family: 'Press Start 2P', monospace;
+  }
+  
+  .header {
+    font-size: 30px;
+    font-family: 'Press Start 2P', monospace;
+    margin: 40px 0;
+    color: rgb(52, 52, 52);
+  }
+  
+  .right-align {
+    text-align: right;
+    align-self: flex-end;
+  }
+  
+  .permalink a {
+    text-decoration:  none;
+    text-decoration-color: white;
+    color: white;
+  }
+  
+  main {
+    max-width: 800px;
+  }
+  @media only screen and (max-width: 565px) {
+    .header {
+      margin: 5px 0 10px 0;
+    }
+    .button {
+      margin: 15px 10px 30px 0;
+    }
+  }
