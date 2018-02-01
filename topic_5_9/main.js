@@ -68,6 +68,13 @@ document.querySelector("#add-item")
         save(toDo);
     });
 
+document.querySelector('#item-input')
+    .addEventListener('keypress', function(e){
+        if (e.charCode == 13) {
+            document.querySelector("#add-item").click();
+        }
+    });
+
 // the toDo list DOM Element
 var list = document.querySelector(".to-do-list");
 
