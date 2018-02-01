@@ -6,42 +6,41 @@
  *   Storing and Retrieving Simple Data, Arrays, Associative Arrays, and Objects
 *******************************************************************************/
 
-var verticleItemMove = {
-    item: null,
-    y: null,
-    x: null,
-    yOffset: null
+var draggedItem = {
+    item: null,     // DOM Element
+    y: null,        // Mouse y
+    x: null,        // Mouse x
+    xOffset: null,  // x mouse distance from upper left corner of Element
+    yOffset: null,  // y mouse distance from upper left corner of Element
+    xStart: null,   // x upper left corner of Element
+    yStart: null,   // y upper left corner of Element
+    startTime: null // start time of mousedown
 };
-var swipeItemMove = {
-    item: null,
-    y: null,
-    x: null,
-    xOffset: null,
-    xStart: null
-};
+var clickStart;
 
+// initial set up of toDo list
 var toDo;
 if (localStorage.length === 0) {
     toDo = {
-    lastID: 4,
-    list: [
-        {
-            title: 'Reorder with arrow',
-            completed: true,
-            id: 3
-        },
-        {
-            title: 'Click to complete',
-            completed: false,
-            id: 0
-        },
-        {
-            title: 'Swipe right to delete',
-            completed: true,
-            id: 1
-        }
-    ]
-}
+        lastID: 4,
+        list: [
+            {
+                title: 'Reorder with arrow',
+                completed: true,
+                id: 3
+            },
+            {
+                title: 'Click to complete',
+                completed: false,
+                id: 0
+            },
+            {
+                title: 'Swipe right to delete',
+                completed: true,
+                id: 1
+            }
+        ]
+    }
 }
 else {
     toDo = localStorage.getItem('toDo');
@@ -62,7 +61,7 @@ var item = function(title, id) {
 /***************************************************
  * Event Listeners
  **************************************************/
-// add item button
+// add list item button
 document.querySelector("#add-item")
     .addEventListener("click", function(){
         var input = document.getElementById('item-input').value;
@@ -79,18 +78,25 @@ document.querySelector("#add-item")
         save(toDo);
     });
 
+// the toDo list DOM Element
 var list = document.querySelector(".to-do-list");
 
-
+// complete item
 list.addEventListener("click", function(e) {
     var item = e.target.parentNode;
     var id = item.id;
-    if (item.classList.contains('to-do-item')) {
-        for (let i=0; i<toDo.list.length; i++) {
-            if (toDo.list[i].id == id) {
-                item.classList.toggle('completed');
-                toDo.list[i].completed = !toDo.list[i].completed;
-                i = toDo.list.length;
+    console.log(e)
+    var timeDif = e.timeStamp - clickStart.timeStamp;
+    var mouseDif = e.clientX - clickStart.clientX;
+    console.log(timeDif + ' ' + mouseDif)
+    if (timeDif < 300 && mouseDif < 5) {
+        if (item.classList.contains('to-do-item')) {
+            for (let i=0; i<toDo.list.length; i++) {
+                if (toDo.list[i].id == id) {
+                    item.classList.toggle('completed');
+                    toDo.list[i].completed = !toDo.list[i].completed;
+                    i = toDo.list.length;
+                }
             }
         }
     }
@@ -98,63 +104,81 @@ list.addEventListener("click", function(e) {
 });
 
 function swipeItem (e) {
-    swipeItemMove.item = e.target;
-    swipeItemMove.y = e.clientY - e.offsetY;
-    swipeItemMove.x = e.clientX;
-    swipeItemMove.xOffset = e.offsetX;
-    swipeItemMove.yOffset = e.clientY - e.layerY;
-    swipeItemMove.xStart = e.target.getBoundingClientRect().left;
-    swipeItemMove.item.style.position = 'absolute';
-    swipeItemMove.item.style.left = `${swipeItemMove.x - swipeItemMove.xOffset}px`;
-    swipeItemMove.item.style.top = `${swipeItemMove.y}px`;
-    
+    console.log(e)
+    clickStart = {
+        top: e.target.getBoundingClientRect().top,
+        left: e.target.getBoundingClientRect().left,
+        item: e.target,
+        clientX: e.clientX,
+        clientY: e.clientY
+    };
+    console.log(clickStart)
+
     document.addEventListener('mousemove',swipe);
     
     document.addEventListener('mouseup',function(e){
         var currX = e.clientX - e.layerX;
-        var start = swipeItemMove.xStart;
+        var start = draggedItem.xStart;
         var distance = currX - start;
-        var rect = swipeItemMove.item.parentNode.getBoundingClientRect();
+        var rect = e.parentNode.getBoundingClientRect();
         var width = rect.right - rect.left;
         var percent = distance/width
         //console.log(percent)
         // has item moved far enough to the right?
         if (percent > .2) {
-            removeItem(swipeItemMove.item.parentNode.id);
-            let parent = swipeItemMove.item.parentNode.parentNode;
+            removeItem(draggedItem.item.parentNode.id);
+            let parent = draggedItem.item.parentNode.parentNode;
             console.log(parent)
-            let child = swipeItemMove.item.parentNode;
+            let child = draggedItem.item.parentNode;
             parent.removeChild(child)
         }
-        // NO? Put it back to normal
+       //NO? Put it back to normal
         document.removeEventListener('mousemove',swipe);
       
-      swipeItemMove.item.setAttribute('style', '');
+      draggedItem.item.setAttribute('style', '');
     });
-
-    function swipe(e) {
-        var left = e.clientX-e.offsetX;
-        if (left < swipeItemMove.xStart) ;
-        else {
-            swipeItemMove.item.style.left = `${e.clientX - swipeItemMove.xOffset}px`;
-        }
-    }
 };
 
+function swipe(e) {
+    console.log(clickStart)
+    var thing = document.getElementById(`${clickStart.item.parentNode.id}`).querySelector('span')
+
+    // is item left edge left of the starting left egde?
+    var edgeDif = thing.getBoundingClientRect().left - clickStart.left;
+    var mouseDif = e.clientX - clickStart.clientX;
+    console.log(mouseDif)
+    if (mouseDif <= 0) {
+        console.log('if')
+        // yes: reassign clickStart
+        if (clickStart.clientX > e.clientX) {
+            clickStart.clientX = e.clientX;
+        }
+    }
+    else {
+        console.log('else mousedif '+ mouseDif)
+        // no: move item with mouse
+        //if (e.target.classList.contains('item-child') && e.target === clickStart.target)
+        thing.style.transform = `translateX(${mouseDif}px)`;
+    }
+}
+
+
+
 function dragItem (e) {
-    verticleItemMove.item = e.target.parentNode;
-    verticleItemMove.y = e.clientY - e.layerY;
-    verticleItemMove.x = e.clientX - e.layerX;
-    verticleItemMove.yOffset = e.layerY;
-    verticleItemMove.item.style.position = 'absolute';
-    verticleItemMove.item.style.left = `${verticleItemMove.x}px`;
-    verticleItemMove.item.style.top = `${verticleItemMove.y}px`;
+    createStartClick(e);
+    draggedItem.item = e.target.parentNode;
+    draggedItem.y = e.clientY - e.layerY;
+    draggedItem.x = e.clientX - e.layerX;
+    draggedItem.yOffset = e.layerY;
+    draggedItem.item.style.position = 'absolute';
+    draggedItem.item.style.left = `${draggedItem.x}px`;
+    draggedItem.item.style.top = `${draggedItem.y}px`;
     
     document.addEventListener('mousemove',drag);
     
     document.addEventListener('mouseup',function(e){
         var currY = e.clientY - e.layerY;
-        verticleItemMove.item.parentNode.removeChild(verticleItemMove.item);
+        draggedItem.item.parentNode.removeChild(draggedItem.item);
         var list = document.querySelector('.to-do-list');
         var position = 1;
         for (let i=1; i<list.childNodes.length; i++) {
@@ -165,16 +189,17 @@ function dragItem (e) {
                 position++
             }
         }
-        moveItem(verticleItemMove.item.id, position-1);
-        list.insertBefore(verticleItemMove.item, list.childNodes[position])
+        moveItem(draggedItem.item.id, position-1);
+        list.insertBefore(draggedItem.item, list.childNodes[position])
         document.removeEventListener('mousemove',drag);
       
-      verticleItemMove.item.setAttribute('style', '');
+      draggedItem.item.setAttribute('style', '');
     });
+}
 
-    function drag(e) {
-        verticleItemMove.item.style.top = `${e.clientY - verticleItemMove.yOffset}px`;
-    }
+
+function drag(e) {
+    draggedItem.item.style.top = `${e.clientY - draggedItem.yOffset}px`;
 }
 
 
@@ -189,13 +214,14 @@ function buildItem(item) {
     var span = document.createElement('span');
     
     span.appendChild(title);
-    span.classList.add('drop-zone-child');
+    span.classList.add('item-child');
     span.addEventListener( 'mousedown', swipeItem);
+    //span.addEventListener( 'touchstart', swipeItemT);
     
     handle.appendChild(document.createTextNode('↕'));
     handle.classList.add('handle');
-    handle.classList.add('drop-zone-child');
     handle.addEventListener( 'mousedown', dragItem )
+    //handle.addEventListener( 'touchstart', dragItemT )
 
     li.id = item.id;
     li.classList.add('to-do-item');
@@ -243,4 +269,16 @@ function moveItem(id, position) {
 function save(toDo) {
     localStorage.setItem('toDo', JSON.stringify(toDo));
 }
+
+
+
+//     return ({
+//         item : e.target,
+//         y : e.clientY - e.offsetY,
+//         x : e.clientX,
+//         xOffset : e.offsetX,
+//         yOffset : e.clientY - e.layerY,
+//         xStart : e.target.getBoundingClientRect().left,
+//     });
+// }
 
