@@ -6,16 +6,6 @@
  *   Storing and Retrieving Simple Data, Arrays, Associative Arrays, and Objects
 *******************************************************************************/
 
-var draggedItem = {
-    item: null,     // DOM Element
-    y: null,        // Mouse y
-    x: null,        // Mouse x
-    xOffset: null,  // x mouse distance from upper left corner of Element
-    yOffset: null,  // y mouse distance from upper left corner of Element
-    xStart: null,   // x upper left corner of Element
-    yStart: null,   // y upper left corner of Element
-    startTime: null // start time of mousedown
-};
 var clickStart;
 
 // initial set up of toDo list
@@ -81,14 +71,13 @@ document.querySelector("#add-item")
 // the toDo list DOM Element
 var list = document.querySelector(".to-do-list");
 
-// complete item
+// click to complete item
 list.addEventListener("click", function(e) {
     var item = e.target.parentNode;
     var id = item.id;
-    console.log(e)
     var timeDif = e.timeStamp - clickStart.timeStamp;
     var mouseDif = e.clientX - clickStart.clientX;
-    console.log(timeDif + ' ' + mouseDif)
+    // No click if too much time ellapsed or movement 
     if (timeDif < 300 && mouseDif < 5) {
         if (item.classList.contains('to-do-item')) {
             for (let i=0; i<toDo.list.length; i++) {
@@ -104,102 +93,82 @@ list.addEventListener("click", function(e) {
 });
 
 function swipeItem (e) {
-    console.log(e)
-    clickStart = {
-        top: e.target.getBoundingClientRect().top,
-        left: e.target.getBoundingClientRect().left,
-        item: e.target,
-        clientX: e.clientX,
-        clientY: e.clientY
-    };
-    console.log(clickStart)
-
+    console.log('swiping item')
+    // get initial state of list item
+    clickStart = createStartClick(e);
+    
     document.addEventListener('mousemove',swipe);
     
-    document.addEventListener('mouseup',function(e){
-        var currX = e.clientX - e.layerX;
-        var start = draggedItem.xStart;
-        var distance = currX - start;
-        var rect = e.parentNode.getBoundingClientRect();
-        var width = rect.right - rect.left;
+    document.addEventListener('mouseup',function mouseup(e){
+        var distance = e.clientX - clickStart.clientX;
+        var width = clickStart.item.getBoundingClientRect().width;
         var percent = distance/width
-        //console.log(percent)
+
+        var item = document.getElementById(`${clickStart.item.parentNode.id}`);
         // has item moved far enough to the right?
         if (percent > .2) {
-            removeItem(draggedItem.item.parentNode.id);
-            let parent = draggedItem.item.parentNode.parentNode;
-            console.log(parent)
-            let child = draggedItem.item.parentNode;
-            parent.removeChild(child)
+            item.parentNode.removeChild(item)
+            console.log(item)
+            removeItem(item.id);
         }
        //NO? Put it back to normal
+        item.querySelector('span').style.transform = `translateX(0px)`;
         document.removeEventListener('mousemove',swipe);
-      
-      draggedItem.item.setAttribute('style', '');
+        document.removeEventListener('mouseup',mouseup);
     });
 };
 
 function swipe(e) {
-    console.log(clickStart)
     var thing = document.getElementById(`${clickStart.item.parentNode.id}`).querySelector('span')
-
-    // is item left edge left of the starting left egde?
     var edgeDif = thing.getBoundingClientRect().left - clickStart.left;
     var mouseDif = e.clientX - clickStart.clientX;
-    console.log(mouseDif)
-    if (mouseDif <= 0) {
-        console.log('if')
+    // is item left edge left of the starting left egde?
+    if (mouseDif < 0) {
         // yes: reassign clickStart
-        if (clickStart.clientX > e.clientX) {
+        if (clickStart.clientX > clickStart.left+20) {
             clickStart.clientX = e.clientX;
         }
     }
     else {
-        console.log('else mousedif '+ mouseDif)
         // no: move item with mouse
-        //if (e.target.classList.contains('item-child') && e.target === clickStart.target)
         thing.style.transform = `translateX(${mouseDif}px)`;
     }
 }
 
-
-
 function dragItem (e) {
-    createStartClick(e);
-    draggedItem.item = e.target.parentNode;
-    draggedItem.y = e.clientY - e.layerY;
-    draggedItem.x = e.clientX - e.layerX;
-    draggedItem.yOffset = e.layerY;
-    draggedItem.item.style.position = 'absolute';
-    draggedItem.item.style.left = `${draggedItem.x}px`;
-    draggedItem.item.style.top = `${draggedItem.y}px`;
+    clickStart = createStartClick(e);
     
     document.addEventListener('mousemove',drag);
     
     document.addEventListener('mouseup',function(e){
-        var currY = e.clientY - e.layerY;
-        draggedItem.item.parentNode.removeChild(draggedItem.item);
-        var list = document.querySelector('.to-do-list');
-        var position = 1;
-        for (let i=1; i<list.childNodes.length; i++) {
-            //console.log(list.childNodes)
-            let rect = list.childNodes[i].getBoundingClientRect();
-            //console.log(currY, rect.top)
-            if (currY > rect.top) {
-                position++
-            }
-        }
-        moveItem(draggedItem.item.id, position-1);
-        list.insertBefore(draggedItem.item, list.childNodes[position])
-        document.removeEventListener('mousemove',drag);
+
+    })
+    
+    moveItem(draggedItem.item.id, position-1);
+    list.insertBefore(draggedItem.item, list.childNodes[position])
+    document.removeEventListener('mousemove',drag);
       
-      draggedItem.item.setAttribute('style', '');
-    });
-}
+    draggedItem.item.setAttribute('style', '');
+    };
+
 
 
 function drag(e) {
-    draggedItem.item.style.top = `${e.clientY - draggedItem.yOffset}px`;
+    var thing = document.getElementById(`${clickStart.item.parentNode.id}`);
+
+    var edgeDif = thing.getBoundingClientRect().top - clickStart.top;
+    var mouseDif = e.clientY - clickStart.clientY;
+    // is item top edge left of the starting left egde?
+    if (mouseDif <= 0) {
+        // yes: reassign clickStart
+        if (clickStart.clientX > clickStart.left+20) {
+            clickStart.clientX = e.clientX;
+        }
+    }
+    else {
+        // no: move item with mouse
+        thing.style.transform = `translateX(${mouseDif}px)`;
+    }
 }
 
 
@@ -270,15 +239,13 @@ function save(toDo) {
     localStorage.setItem('toDo', JSON.stringify(toDo));
 }
 
-
-
-//     return ({
-//         item : e.target,
-//         y : e.clientY - e.offsetY,
-//         x : e.clientX,
-//         xOffset : e.offsetX,
-//         yOffset : e.clientY - e.layerY,
-//         xStart : e.target.getBoundingClientRect().left,
-//     });
-// }
-
+function createStartClick(e) {
+    return {
+        top: e.target.getBoundingClientRect().top,
+        left: e.target.getBoundingClientRect().left,
+        item: e.target,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        timeStamp: e.timeStamp
+    };
+}
