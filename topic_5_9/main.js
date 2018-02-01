@@ -137,37 +137,43 @@ function swipe(e) {
 
 function dragItem (e) {
     clickStart = createStartClick(e);
-    
+    console.log("dragging outer");
+
+    var duplicate = e.target.parentNode.cloneNode(true);
+    duplicate.id = duplicate.id+'d';
+    clickStart.item = duplicate;
+    document.querySelector('body').appendChild(duplicate)
     document.addEventListener('mousemove',drag);
     
     document.addEventListener('mouseup',function(e){
-
+        
+        document.removeEventListener('mousemove',drag);
     })
     
-    moveItem(draggedItem.item.id, position-1);
-    list.insertBefore(draggedItem.item, list.childNodes[position])
-    document.removeEventListener('mousemove',drag);
+    //moveItem(draggedItem.item.id, position-1);
+    //list.insertBefore(draggedItem.item, list.childNodes[position])
       
-    draggedItem.item.setAttribute('style', '');
+    //draggedItem.item.setAttribute('style', '');
     };
 
 
 
 function drag(e) {
-    var thing = document.getElementById(`${clickStart.item.parentNode.id}`);
-
+    console.log('dragging inner')
+    var thing = document.getElementById(`${clickStart.item.id}`);
+console.log(thing)
     var edgeDif = thing.getBoundingClientRect().top - clickStart.top;
     var mouseDif = e.clientY - clickStart.clientY;
     // is item top edge left of the starting left egde?
-    if (mouseDif <= 0) {
+    if (mouseDif /*<= 0*/) {
         // yes: reassign clickStart
-        if (clickStart.clientX > clickStart.left+20) {
-            clickStart.clientX = e.clientX;
+        if (clickStart.clientY > clickStart.top) {
+            clickStart.clientY = e.clientY;
         }
     }
     else {
         // no: move item with mouse
-        thing.style.transform = `translateX(${mouseDif}px)`;
+        thing.style.transform = `translateY(${mouseDif}px)`;
     }
 }
 
