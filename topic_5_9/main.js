@@ -56,7 +56,6 @@ document.querySelector("#add-item")
     .addEventListener("click", function(){
         var input = document.getElementById('item-input').value;
         if (!input.replace(/\s/g, '').length) {
-            console.log('too much space');
             document.getElementById('item-input').value = '';
             return;
         }
@@ -66,14 +65,14 @@ document.querySelector("#add-item")
 
         document.getElementById('item-input').value = '';
         save(toDo);
-    });
+});
 
 document.querySelector('#item-input')
     .addEventListener('keypress', function(e){
         if (e.charCode == 13) {
             document.querySelector("#add-item").click();
         }
-    });
+});
 
 // the toDo list DOM Element
 var list = document.querySelector(".to-do-list");
@@ -100,7 +99,6 @@ list.addEventListener("click", function(e) {
 });
 
 function swipeItem (e) {
-    console.log('swiping item')
     // get initial state of list item
     clickStart = createStartClick(e);
     
@@ -115,7 +113,6 @@ function swipeItem (e) {
         // has item moved far enough to the right?
         if (percent > .2) {
             item.parentNode.removeChild(item)
-            console.log(item)
             removeItem(item.id);
         }
        //NO? Put it back to normal
@@ -147,7 +144,6 @@ function dragItem (e) {
     var duplicate = e.target.parentNode.cloneNode(true);
     duplicate.id = duplicate.id+'d';
     duplicate.classList.add('duplicate');
-    console.log(e)
     duplicate.style.top = `${e.clientY + clickStart.top - clickStart.clientY}px`;
     duplicate.style.left = `${20}px`;
     clickStart.item.parentNode.classList.toggle('hidden')
@@ -158,17 +154,11 @@ function dragItem (e) {
     document.addEventListener('mouseup',function mouseup(e){
         clickStart.item.parentNode.classList.toggle('hidden');
         var item = document.getElementById(`${clickStart.item.parentNode.id}d`);
-        console.log(item)
         item.parentNode.removeChild(item)
         document.removeEventListener('mousemove',drag);
         document.removeEventListener('mouseup',mouseup);
     })
-    
-    //moveItem(draggedItem.item.id, position-1);
-    //list.insertBefore(draggedItem.item, list.childNodes[position])
-      
-    //draggedItem.item.setAttribute('style', '');
-    };
+};
 
 function drag(e) {
     var thing = document.getElementById(`${clickStart.item.parentNode.id}d`);
@@ -177,16 +167,14 @@ function drag(e) {
     var numItems = document.querySelector('.to-do-list').offsetHeight/height;
     var offset = clickStart.clientY - clickStart.top;
     var position = Math.round((e.clientY - listTop - offset + height/2)/height);
-    putInPosition(position);
-    moveItem(clickStart.item.id, position);
+    putInPosition(position-1);
+    moveItem(clickStart.item.parentNode.id, position-1);
     thing.style.top = `${e.clientY + clickStart.top - clickStart.clientY}px`;
-    
 }
 function putInPosition(pos) {
     var container = document.querySelector('.to-do-list');
-    container.insertBefore(clickStart.item.parentNode, container.children[pos]);
+    container.insertBefore(clickStart.item.parentNode, container.children[pos+1]);
 }
-
 
 /***************************************************
  * DOM
@@ -233,6 +221,22 @@ function drawList(list) {
     });
 };
 
+// create startClick object
+function createStartClick(e) {
+    return {
+        top: e.target.getBoundingClientRect().top,
+        left: e.target.getBoundingClientRect().left,
+        item: e.target,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        timeStamp: e.timeStamp
+    };
+}
+
+/***************************************************
+ * Objects
+ **************************************************/
+
 // remove item from toDo list object
 function removeItem(id) {
     for (let i=0; i<toDo.list.length; i++) {
@@ -247,9 +251,12 @@ function removeItem(id) {
 function moveItem(id, position) {
     for (let i=0; i<toDo.list.length; i++) {
         if (toDo.list[i].id == id) {
-            let item = toDo.list[i];
-            toDo.list.splice(i, 1);
-            toDo.list.splice(position < i ? position : position+1, 0, item);
+            if (i == position);
+            else {
+                let item = toDo.list[i];
+                toDo.list.splice(i, 1);
+                toDo.list.splice(position < i ? position+1 : position, 0, item);
+            }
         }
     }
     save(toDo);
@@ -258,16 +265,4 @@ function moveItem(id, position) {
 // save toDo object to local storage
 function save(toDo) {
     localStorage.setItem('toDo', JSON.stringify(toDo));
-}
-
-// create startClick object
-function createStartClick(e) {
-    return {
-        top: e.target.getBoundingClientRect().top,
-        left: e.target.getBoundingClientRect().left,
-        item: e.target,
-        clientX: e.clientX,
-        clientY: e.clientY,
-        timeStamp: e.timeStamp
-    };
 }
