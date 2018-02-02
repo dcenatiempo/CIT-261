@@ -144,17 +144,24 @@ function swipe(e) {
 
 function dragItem (e) {
     clickStart = createStartClick(e);
-    console.log("dragging outer");
-
     var duplicate = e.target.parentNode.cloneNode(true);
     duplicate.id = duplicate.id+'d';
-    clickStart.item = duplicate;
+    duplicate.classList.add('duplicate');
+    console.log(e)
+    duplicate.style.top = `${e.clientY + clickStart.top - clickStart.clientY}px`;
+    duplicate.style.left = `${20}px`;
+    clickStart.item.parentNode.classList.toggle('hidden')
+    
     document.querySelector('body').appendChild(duplicate)
     document.addEventListener('mousemove',drag);
-    
-    document.addEventListener('mouseup',function(e){
-        
+
+    document.addEventListener('mouseup',function mouseup(e){
+        clickStart.item.parentNode.classList.toggle('hidden');
+        var item = document.getElementById(`${clickStart.item.parentNode.id}d`);
+        console.log(item)
+        item.parentNode.removeChild(item)
         document.removeEventListener('mousemove',drag);
+        document.removeEventListener('mouseup',mouseup);
     })
     
     //moveItem(draggedItem.item.id, position-1);
@@ -163,25 +170,21 @@ function dragItem (e) {
     //draggedItem.item.setAttribute('style', '');
     };
 
-
-
 function drag(e) {
-    console.log('dragging inner')
-    var thing = document.getElementById(`${clickStart.item.id}`);
-console.log(thing)
-    var edgeDif = thing.getBoundingClientRect().top - clickStart.top;
-    var mouseDif = e.clientY - clickStart.clientY;
-    // is item top edge left of the starting left egde?
-    if (mouseDif /*<= 0*/) {
-        // yes: reassign clickStart
-        if (clickStart.clientY > clickStart.top) {
-            clickStart.clientY = e.clientY;
-        }
-    }
-    else {
-        // no: move item with mouse
-        thing.style.transform = `translateY(${mouseDif}px)`;
-    }
+    var thing = document.getElementById(`${clickStart.item.parentNode.id}d`);
+    var listTop = document.querySelector('.to-do-list').offsetTop;
+    var height = thing.offsetHeight;
+    var numItems = document.querySelector('.to-do-list').offsetHeight/height;
+    var offset = clickStart.clientY - clickStart.top;
+    var position = Math.round((e.clientY - listTop - offset + height/2)/height);
+    putInPosition(position);
+    moveItem(clickStart.item.id, position);
+    thing.style.top = `${e.clientY + clickStart.top - clickStart.clientY}px`;
+    
+}
+function putInPosition(pos) {
+    var container = document.querySelector('.to-do-list');
+    container.insertBefore(clickStart.item.parentNode, container.children[pos]);
 }
 
 
@@ -216,18 +219,21 @@ function buildItem(item) {
     return li;
 }
 
+// add single list item to DOM
 function addItemToDOM(li) {
     var div = document.querySelector('div.to-do-list');
     div.appendChild(li);
 }
 
+// build out entire list in the DOM
 function drawList(list) {
     list.forEach( item => {
         var listItem = buildItem(item);
         addItemToDOM(listItem);
     });
 };
-// remove from object
+
+// remove item from toDo list object
 function removeItem(id) {
     for (let i=0; i<toDo.list.length; i++) {
         if (toDo.list[i].id == id) {
@@ -237,6 +243,7 @@ function removeItem(id) {
     save(toDo);
 }
 
+// move toDo list item[id] to position
 function moveItem(id, position) {
     for (let i=0; i<toDo.list.length; i++) {
         if (toDo.list[i].id == id) {
@@ -248,10 +255,12 @@ function moveItem(id, position) {
     save(toDo);
 }
 
+// save toDo object to local storage
 function save(toDo) {
     localStorage.setItem('toDo', JSON.stringify(toDo));
 }
 
+// create startClick object
 function createStartClick(e) {
     return {
         top: e.target.getBoundingClientRect().top,

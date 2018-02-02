@@ -19,6 +19,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 }
 
 .handle {
@@ -43,4 +44,19 @@ div.completed span{
 
 .hover {
   background-color: pink;
+}
+
+.handle:hover {
+  cursor: move;
+}
+
+.duplicate {
+  opacity: .9;
+  position: absolute;
+  background-color: white;
+}
+
+.hidden {
+  /* visibility: hidden; */
+  background-color:blue;
 }
