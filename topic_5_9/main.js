@@ -358,3 +358,30 @@ function moveItem(id, position) {
 function save(toDo) {
     localStorage.setItem('toDo', JSON.stringify(toDo));
 }
+
+// Function to disable "pull-to-refresh" effect present in some webviews.
+// Especially Crosswalk 12 and above (Chromium 41+) runtimes.
+window.addEventListener('load', function() {
+    var lastTouchY = 0 ;
+    var maybePreventPullToRefresh = false ;
+    // Pull-to-refresh will only trigger if the scroll begins when the
+    // document's Y offset is zero.
+    var touchstartHandler = function(e) {
+        if( e.touches.length != 1 ) {
+            return ;
+        }
+        lastTouchY = e.touches[0].clientY ;
+        maybePreventPullToRefresh = (window.pageYOffset === 0) ;
+    };
+    var touchmoveHandler = function(e) {
+        var touchYDelta = touchY - lastTouchY ;
+        lastTouchY = touchY ;
+        if (maybePreventPullToRefresh) {
+            maybePreventPullToRefresh = false ;
+                e.preventDefault() ;
+                return ;
+        }
+    }
+    document.addEventListener('touchstart', touchstartHandler, false) ;
+    document.addEventListener('touchmove', touchmoveHandler, false) ;
+});
