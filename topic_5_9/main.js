@@ -176,6 +176,86 @@ function putInPosition(pos) {
     container.insertBefore(clickStart.item.parentNode, container.children[pos+1]);
 }
 
+//// TOUCH EVENTS /////
+function tSwipeItem (e) {
+    // get initial state of list item
+    clickStart = tCreateStartClick(e);
+    
+    document.addEventListener('touchmove',tSwipe);
+    
+    document.addEventListener('touchend',function touchend(e){
+        console.log(e)
+        var distance = e.changedTouches[0].clientX - clickStart.clientX;
+        var width = clickStart.item.getBoundingClientRect().width;
+        var percent = distance/width
+
+        var item = document.getElementById(`${clickStart.item.parentNode.id}`);
+        // has item moved far enough to the right?
+        if (percent > .2) {
+            item.parentNode.removeChild(item)
+            removeItem(item.id);
+        }
+       //NO? Put it back to normal
+        item.querySelector('span').style.transform = `translateX(0px)`;
+        document.removeEventListener('touchmove',tSwipe);
+        document.removeEventListener('touched', touchend);
+    });
+};
+
+function tSwipe(e) {
+    var thing = document.getElementById(`${clickStart.item.parentNode.id}`).querySelector('span')
+    var edgeDif = thing.getBoundingClientRect().left - clickStart.left;
+    var mouseDif = e.changedTouches[0].clientX - clickStart.clientX;
+    // is item left edge left of the starting left egde?
+    if (mouseDif < 0) {
+        // yes: reassign clickStart
+        if (clickStart.clientX > clickStart.left+20) {
+            clickStart.clientX = e.touches[0].clientX;
+        }
+    }
+    else {
+        // no: move item with mouse
+        thing.style.transform = `translateX(${mouseDif}px)`;
+    }
+}
+
+function tDragItem (e) {
+    clickStart = tCreateStartClick(e);
+    var duplicate = e.target.parentNode.cloneNode(true);
+    duplicate.id = duplicate.id+'d';
+    duplicate.classList.add('duplicate');
+    duplicate.style.top = `${e.changedTouches[0].clientY + clickStart.top - clickStart.clientY}px`;
+    duplicate.style.left = `${20}px`;
+    clickStart.item.parentNode.classList.toggle('hidden')
+    
+    document.querySelector('body').appendChild(duplicate)
+    document.addEventListener('touchmove', tDrag);
+
+    document.addEventListener('touchend',function touchend(e){
+        clickStart.item.parentNode.classList.toggle('hidden');
+        var item = document.getElementById(`${clickStart.item.parentNode.id}d`);
+        item.parentNode.removeChild(item)
+        document.removeEventListener('touchmove',tDrag);
+        document.removeEventListener('touchend',touchend);
+    })
+};
+
+function tDrag(e) {
+    var thing = document.getElementById(`${clickStart.item.parentNode.id}d`);
+    var listTop = document.querySelector('.to-do-list').offsetTop;
+    var height = thing.offsetHeight;
+    var numItems = document.querySelector('.to-do-list').offsetHeight/height;
+    var offset = clickStart.clientY - clickStart.top;
+    var position = Math.round((e.changedTouches[0].clientY - listTop - offset + height/2)/height);
+    putInPosition(position-1);
+    moveItem(clickStart.item.parentNode.id, position-1);
+    thing.style.top = `${e.touches[0].clientY + clickStart.top - clickStart.clientY}px`;
+}
+function putInPosition(pos) {
+    var container = document.querySelector('.to-do-list');
+    container.insertBefore(clickStart.item.parentNode, container.children[pos+1]);
+}
+
 /***************************************************
  * DOM
  **************************************************/
@@ -189,12 +269,12 @@ function buildItem(item) {
     span.appendChild(title);
     span.classList.add('item-child');
     span.addEventListener( 'mousedown', swipeItem);
-    //span.addEventListener( 'touchstart', swipeItemT);
+    span.addEventListener( 'touchstart', tSwipeItem);
     
     handle.appendChild(document.createTextNode('↕'));
     handle.classList.add('handle');
     handle.addEventListener( 'mousedown', dragItem )
-    //handle.addEventListener( 'touchstart', dragItemT )
+    handle.addEventListener( 'touchstart', tDragItem )
 
     li.id = item.id;
     li.classList.add('to-do-item');
@@ -231,6 +311,18 @@ function createStartClick(e) {
         clientY: e.clientY,
         timeStamp: e.timeStamp
     };
+}
+
+function tCreateStartClick(e) {
+    var click = {
+        top: e.target.getBoundingClientRect().top,
+        left: e.target.getBoundingClientRect().left,
+        item: e.target,
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+        timeStamp: e.timeStamp
+    };
+    return click;
 }
 
 /***************************************************

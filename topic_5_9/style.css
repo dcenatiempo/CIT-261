@@ -2,6 +2,9 @@
   box-sizing: border-box;
   font-family: Helvetica, sans-serif
 }
+body {
+  overflow: hidden;
+}
 
 h1 {
   font-size: 10vw;
