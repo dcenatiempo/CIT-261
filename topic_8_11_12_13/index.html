@@ -11,6 +11,29 @@
   <title>Document</title>
 </head>
 <body>
+  <section>
+    <h1>Analog Clock</h1>
+    <h2>A study of Animations and Transitions</h2>
+    <p>The Second hand uses Animation with 5 keyframes to animate both the rotation and the shadow</p>
+    <p>The Minute and Hour hand use transitions triggered when JavaScript changes the <span class="code">transform: rotate()</span> style property and the <span class="code">box-shadow</span> style</p>
+    <p>Notice the clock is responsive, and everything (including shadows) scales to fit the window</p>
+    <p>Click the clock to "Bump" it and see another animation</p>
+  </section>
+  <section class="face">
+    <div class="hour-container">
+      <div class="hour hand">
+      </div>
+    </div>
+    <div class="minute-container">
+      <div class="minute hand">
+      </div>
+    </div>
+    <div class="second-container">
+      <div class="second hand"></div>
+      <div class="circle"></div>
+      <div class="rect"></div>
+    </div>
+  </section>
 </body>
 <script type="text/javascript" src="./main.js"></script>
 </html>

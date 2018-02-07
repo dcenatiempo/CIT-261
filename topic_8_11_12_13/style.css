@@ -1,0 +1,157 @@
+body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  
+}
+.code {
+  font-family: courier;
+  background-color: lightgrey;
+  padding: 2px;
+}
+@keyframes shadow {
+  0% {
+    box-shadow:  1vw  1vw 1vw rgba(0, 0, 0, .3);
+  }
+  25% {
+    box-shadow:  1vw -1vw 1vw rgba(0, 0, 0, .3);
+  }
+  50% {
+    box-shadow: -1vw -1vw 1vw rgba(0, 0, 0, .3);
+  }
+  75% {
+    box-shadow:  -1vw 1vw 1vw rgba(0, 0, 0, .3);
+  }
+  100% {
+    box-shadow:  1vw  1vw 1vw rgba(0, 0, 0, .3);
+  }
+}
+@keyframes second {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(90deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  75% {
+    transform: rotate(270deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bump {
+  0% {
+    box-shadow: 1vw 1vw 1vw rgba(0, 0, 0, .4), .3vw .3vw .5vw rgba(0, 0, 0, .3) inset;
+    background-color: rgb(235, 235, 235);
+    transform: rotateY(0deg);
+  }
+  10% {
+    box-shadow: 12vw 1vw 5vw rgba(0, 0, 0, .4), .1vw .3vw .2vw rgba(0, 0, 0, .3) inset;
+    background-color: rgb(255, 255, 255);
+    transform: rotateY(40deg);
+  }
+  35% {
+    box-shadow: .1vw .1vw 1vw rgba(0, 0, 0, .4), 2vw 1vw .5vw rgba(0, 0, 0, .3) inset;
+    background-color: rgb(164, 164, 164);
+    transform: rotateY(-30deg);
+  }
+  60% {
+    box-shadow: 5vw 1vw 3vw rgba(0, 0, 0, .4), .1vw .2vw .3vw rgba(0, 0, 0, .3) inset;
+    background-color: rgb(245, 245, 245);
+    transform: rotateY(20deg);
+  }
+  80% {
+    box-shadow: .5vw .5vw 1vw rgba(0, 0, 0, .4), 1.5vw .7vw .5vw rgba(0, 0, 0, .3) inset;
+    background-color: rgb(208, 208, 208);
+    transform: rotateY(-13deg);
+  }
+  100% {
+    box-shadow: 1vw 1vw 1vw rgba(0, 0, 0, .4), .3vw .3vw .5vw rgba(0, 0, 0, .3) inset;
+    background-color: rgb(235, 235, 235);
+    transform: rotateY(0deg);
+  }
+}
+.bump {
+  animation-name: bump;
+  animation-duration: 3s;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in-out;
+  transform-origin: 50% 30%;
+}
+
+.face {
+  margin: auto;
+  position: relative;
+  border-radius:100%;
+  border: solid;
+  border-width: 1vw;
+  width: 50vw;
+  max-width: 90vh;
+  height: 50vw;
+  max-height: 90vh;
+  box-shadow: 1vw 1vw 1vw rgba(0, 0, 0, .4), .3vw .3vw .5vw rgba(0, 0, 0, .3) inset;
+  background-color: rgb(235, 235, 235);
+}
+.hand {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: black;
+  transform-orgin: center bottom;
+}
+.hour-container, .minute-container, .second-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.hour-container {
+  transition: transform .2s;
+}
+.minute-container {
+  transition: transform .2s;
+  transition-timing-function: cubic-bezier(.62,0,.75,1)
+}
+.second-container {
+  animation-name: second;
+  animation-duration: 60s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+.hour {
+  width: 3%;
+  height: 35%;
+  transform: translate(1615%, 60%);
+}
+.minute {
+  width: 2%;
+  height: 45%;
+  transform: translate(2450%,25%);
+}
+.second {
+  background-color: red;  
+  width: 1%;
+  height: 58%;
+  transform: translate(4945%, 10%);
+  animation-name: shadow;
+  animation-duration: 60s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+.second-container div.circle {
+  border-radius: 200%;
+  background-color: red;
+  height: 3%;
+  width: 3%;
+  transform: translate(1615%, 1615%);
+}
+.second-container div.rect {
+  background-color: red;
+  height: 10%;
+  width: 2%;
+  transform: translate(2447%, 515%);
+}
