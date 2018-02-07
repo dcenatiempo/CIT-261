@@ -1,7 +1,7 @@
 body {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  
+  overflow-X: hidden;
 }
 .code {
   font-family: courier;
@@ -108,6 +108,7 @@ body {
   right: 0;
   bottom: 0;
   left: 0;
+
 }
 .hour-container {
   transition: transform .2s;
