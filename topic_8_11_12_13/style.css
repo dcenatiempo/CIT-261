@@ -1,7 +1,7 @@
 body {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  overflow-X: hidden;
+  overflow: hidden;
 }
 .code {
   font-family: courier;
@@ -83,7 +83,6 @@ body {
 }
 
 .face {
-  margin: auto;
   position: relative;
   border-radius:100%;
   border: solid;
