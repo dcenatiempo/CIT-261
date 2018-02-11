@@ -32,14 +32,23 @@ let changeQuote = function(data) {
 }
 
 let getRandomQuote = function() {
+    // create handle to XMLHttpRequest object
     var xhttp = new XMLHttpRequest();
+    // set the onreadystatechange behavior
+    // 0 UNSENT             Client has been created. open() not called yet.
+    // 1 OPENED             open() has been called.
+    // 2 HEADERS_RECEIVED   send() has been called, and headers and status are available.
+    // 3 LOADING            Downloading; responseText holds partial data.
+    // 4 DONE               The operation is complete.
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             console.log(this.responseText);
             processJSON(this.responseText);
-    }
+        }
     };
+    // Initializes a request (method, url, async, user, password)
     xhttp.open("GET", "http://quotes.stormconsultancy.co.uk/random.json", true);
+    // Sends the request (data)
     xhttp.send();
 };
 
